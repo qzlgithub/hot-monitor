@@ -70,10 +70,10 @@ export default function Notifications() {
       <div className="flex items-center justify-between mb-8">
         <div>
           <h1 className="text-4xl font-bold mb-2 flex items-center gap-3">
-            <Bell className="w-8 h-8 text-amber-400" />
+            <Bell className="w-8 h-8 text-orange-500" />
             通知中心
           </h1>
-          <p className="text-slate-400">
+          <p className="text-stone-500">
             {unreadCount > 0
               ? `您有 ${unreadCount} 条未读通知`
               : '所有通知已读'}
@@ -94,7 +94,7 @@ export default function Notifications() {
           className={`px-4 py-2 rounded-lg font-semibold transition-all ${
             filter === 'all'
               ? 'bg-gradient-to-r from-amber-500 to-orange-600 text-white'
-              : 'bg-slate-800/50 text-slate-300 hover:text-slate-100'
+              : 'bg-white border border-stone-200 text-stone-500 hover:text-stone-800 hover:border-stone-300'
           }`}
         >
           全部
@@ -104,7 +104,7 @@ export default function Notifications() {
           className={`px-4 py-2 rounded-lg font-semibold transition-all ${
             filter === 'unread'
               ? 'bg-gradient-to-r from-amber-500 to-orange-600 text-white'
-              : 'bg-slate-800/50 text-slate-300 hover:text-slate-100'
+              : 'bg-white border border-stone-200 text-stone-500 hover:text-stone-800 hover:border-stone-300'
           }`}
         >
           未读 ({unreadCount})
@@ -114,7 +114,7 @@ export default function Notifications() {
           className={`px-4 py-2 rounded-lg font-semibold transition-all ${
             filter === 'read'
               ? 'bg-gradient-to-r from-amber-500 to-orange-600 text-white'
-              : 'bg-slate-800/50 text-slate-300 hover:text-slate-100'
+              : 'bg-white border border-stone-200 text-stone-500 hover:text-stone-800 hover:border-stone-300'
           }`}
         >
           已读
@@ -124,9 +124,9 @@ export default function Notifications() {
       {/* 通知列表 */}
       <div className="space-y-3">
         {filteredNotifications.length === 0 ? (
-          <div className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 border border-orange-500/10 rounded-xl p-12 text-center">
-            <Bell className="w-12 h-12 text-slate-600 mx-auto mb-3" />
-            <p className="text-slate-400">
+          <div className="bg-white border border-stone-200 rounded-xl p-12 text-center">
+            <Bell className="w-12 h-12 text-stone-300 mx-auto mb-3" />
+            <p className="text-stone-500">
               {filter === 'all' ? '暂无通知' : '暂无相关通知'}
             </p>
           </div>
@@ -136,8 +136,8 @@ export default function Notifications() {
               key={notification.id}
               className={`rounded-xl p-4 card-hover transition-all ${
                 notification.read
-                  ? 'bg-slate-900/30 border border-slate-700/30'
-                  : 'bg-gradient-to-br from-slate-800/50 to-slate-900/50 border border-orange-500/20 shadow-lg shadow-orange-500/10'
+                  ? 'bg-stone-50 border border-stone-200'
+                  : 'bg-white border border-orange-500/30 shadow-lg shadow-orange-500/10'
               }`}
             >
               <div className="flex items-start gap-4">
@@ -165,18 +165,18 @@ export default function Notifications() {
                 {/* 内容 */}
                 <div className="flex-1 min-w-0">
                   <div className="flex items-start justify-between mb-1">
-                    <h3 className="font-bold text-slate-100">{notification.title}</h3>
+                    <h3 className="font-bold text-stone-800">{notification.title}</h3>
                     {!notification.read && (
                       <div className="w-2 h-2 rounded-full bg-amber-500 flex-shrink-0" />
                     )}
                   </div>
-                  <p className="text-sm text-slate-400 mb-2">{notification.message}</p>
+                  <p className="text-sm text-stone-500 mb-2">{notification.message}</p>
 
-                  <div className="flex items-center gap-2 text-xs text-slate-500">
-                    <span className="bg-slate-700/50 px-2 py-1 rounded">
+                  <div className="flex items-center gap-2 text-xs text-stone-400">
+                    <span className="bg-stone-100 px-2 py-1 rounded">
                       关键词: {notification.keyword}
                     </span>
-                    <span className="bg-slate-700/50 px-2 py-1 rounded">
+                    <span className="bg-stone-100 px-2 py-1 rounded">
                       来源: {notification.source}
                     </span>
                     <span>
@@ -190,7 +190,7 @@ export default function Notifications() {
                   {!notification.read && (
                     <button
                       onClick={() => markAsRead(notification.id)}
-                      className="p-2 hover:bg-slate-700/50 rounded-lg transition-colors text-slate-400 hover:text-slate-100"
+                      className="p-2 hover:bg-stone-100 rounded-lg transition-colors text-stone-400 hover:text-stone-800"
                       title="标记为已读"
                     >
                       <CheckCircle className="w-5 h-5" />

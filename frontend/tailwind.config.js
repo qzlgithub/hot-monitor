@@ -16,11 +16,21 @@ export default {
       animation: {
         'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
         'slide-in': 'slideIn 0.3s ease-out',
+        spotlight: 'spotlight 2s ease .75s 1 forwards',
+        'grid-pan': 'gridPan 20s linear infinite',
       },
       keyframes: {
         slideIn: {
           '0%': { opacity: '0', transform: 'translateY(-10px)' },
           '100%': { opacity: '1', transform: 'translateY(0)' },
+        },
+        spotlight: {
+          '0%': { opacity: 0, transform: 'translate(-72%, -62%) scale(0.5)' },
+          '100%': { opacity: 1, transform: 'translate(-50%, -40%) scale(1)' },
+        },
+        gridPan: {
+          '0%': { backgroundPosition: '0 0' },
+          '100%': { backgroundPosition: '0 40px' },
         },
       },
     },

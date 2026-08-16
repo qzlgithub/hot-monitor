@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react'
 import { RefreshCw, TrendingUp, Share2, ExternalLink } from 'lucide-react'
 import { toast } from 'sonner'
+import { Spotlight } from '../components/ui/Spotlight'
+import { MovingBorderCard } from '../components/ui/MovingBorder'
 
 interface Hotspot {
   id: string
@@ -50,7 +52,7 @@ export default function Trending() {
 
   const ScoreBar = ({ score }: { score: number }) => (
     <div className="flex items-center gap-2">
-      <div className="flex-1 h-2 bg-slate-700/50 rounded-full overflow-hidden">
+      <div className="flex-1 h-2 bg-stone-200 rounded-full overflow-hidden">
         <div
           className="h-full bg-gradient-to-r from-amber-500 to-red-500 transition-all duration-300"
           style={{ width: `${Math.min(score * 10, 100)}%` }}
@@ -62,16 +64,23 @@ export default function Trending() {
 
   return (
     <div className="space-y-6 animate-slide-in">
-      <div className="flex items-center justify-between mb-8">
+      <div className="relative flex items-center justify-between mb-8">
+        <Spotlight className="-top-8 left-0" />
         <div>
-          <h1 className="text-4xl font-bold mb-2">热点发现</h1>
-          <p className="text-slate-400">AI识别的实时热点事件</p>
+          <div className="flex items-center gap-3">
+            <h1 className="text-4xl font-bold">热点发现</h1>
+            <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-orange-600 bg-amber-500/15 border border-amber-500/30 px-2.5 py-1 rounded-full">
+              <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" aria-hidden="true" />
+              {hotspots.length} 条实时热点
+            </span>
+          </div>
+          <p className="text-stone-500 mt-1.5">AI 识别实时热点，抢先一步发现趋势</p>
         </div>
 
         <button
           onClick={fetchHotspots}
           disabled={loading}
-          className="btn-primary flex items-center gap-2 disabled:opacity-50"
+          className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-400 hover:to-orange-500 text-white font-semibold shadow-lg shadow-orange-600/25 transition-all focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2 focus:ring-offset-stone-100 disabled:opacity-50 active:scale-95"
         >
           <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
           {loading ? '更新中...' : '刷新'}
@@ -87,7 +96,7 @@ export default function Trending() {
             className={`px-4 py-2 rounded-lg font-semibold transition-all whitespace-nowrap ${
               filter === cat
                 ? 'bg-gradient-to-r from-amber-500 to-orange-600 text-white'
-                : 'bg-slate-800/50 text-slate-300 hover:text-slate-100'
+                : 'bg-white border border-stone-200 text-stone-500 hover:text-stone-800 hover:border-stone-300'
             }`}
           >
             {cat === 'all' ? '全部' : cat}
@@ -98,28 +107,30 @@ export default function Trending() {
       {/* 热点列表 */}
       <div className="space-y-4">
         {filteredHotspots.length === 0 ? (
-          <div className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 border border-orange-500/10 rounded-xl p-12 text-center">
-            <TrendingUp className="w-12 h-12 text-slate-600 mx-auto mb-3" />
-            <p className="text-slate-400">暂无热点数据，请稍后再试</p>
+          <div className="relative overflow-hidden bg-white border border-stone-200 rounded-xl p-12 text-center">
+            <div className="absolute -top-10 left-1/2 -translate-x-1/2 w-40 h-24 rounded-full bg-orange-500/10 blur-3xl" aria-hidden="true" />
+            <TrendingUp className="w-12 h-12 text-stone-300 mx-auto mb-3" />
+            <p className="text-stone-500">暂无热点数据，请稍后再试</p>
           </div>
         ) : (
           filteredHotspots.map((hotspot, index) => (
-            <div
-              key={hotspot.id}
-              className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 border border-orange-500/10 rounded-xl p-6 card-hover group"
-            >
+            <MovingBorderCard key={hotspot.id} borderRadius="0.85rem">
+              <div className="p-6 card-hover group h-full">
               {/* 排名和热度 */}
               <div className="flex items-start justify-between mb-4">
                 <div className="flex items-start gap-4">
-                  <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-amber-500/20 to-orange-600/20 flex items-center justify-center">
-                    <span className="text-lg font-bold text-amber-400">#{index + 1}</span>
+                  <div className="relative w-12 h-12 rounded-xl bg-gradient-to-br from-amber-500/15 to-orange-500/10 border border-amber-500/20 flex items-center justify-center">
+                    <span className="text-lg font-bold text-orange-500">#{index + 1}</span>
+                    {index === 0 && (
+                      <span className="absolute -top-1.5 -right-1.5 w-3 h-3 rounded-full bg-orange-400 animate-pulse" aria-hidden="true" />
+                    )}
                   </div>
 
                   <div className="flex-1">
-                    <h3 className="text-lg font-bold text-slate-100 mb-2 line-clamp-2 group-hover:text-amber-300 transition-colors">
+                    <h3 className="text-lg font-bold text-stone-800 mb-2 line-clamp-2 group-hover:text-orange-600 transition-colors">
                       {hotspot.title}
                     </h3>
-                    <p className="text-sm text-slate-400 line-clamp-2 mb-3">
+                    <p className="text-sm text-stone-500 line-clamp-2 mb-3">
                       {hotspot.description}
                     </p>
 
@@ -130,14 +141,14 @@ export default function Trending() {
 
                     {/* 标签 */}
                     <div className="flex items-center gap-2 flex-wrap">
-                      <span className="text-xs bg-amber-500/20 text-amber-300 px-2 py-1 rounded-full">
+                      <span className="text-xs bg-amber-500/15 text-orange-600 px-2 py-1 rounded-full">
                         {hotspot.source}
                       </span>
-                      <span className="text-xs bg-slate-700/50 text-slate-300 px-2 py-1 rounded-full">
+                      <span className="text-xs bg-stone-100 text-stone-600 px-2 py-1 rounded-full">
                         {hotspot.category}
                       </span>
                       {hotspot.keywords.map((kw) => (
-                        <span key={kw} className="text-xs bg-slate-700/30 text-slate-300 px-2 py-1 rounded-full">
+                        <span key={kw} className="text-xs bg-stone-100 text-stone-500 px-2 py-1 rounded-full">
                           #{kw}
                         </span>
                       ))}
@@ -148,8 +159,8 @@ export default function Trending() {
                 {/* 趋势和操作 */}
                 <div className="flex items-start gap-2">
                   <div className="flex flex-col items-center gap-1">
-                    <TrendingUp className={`w-5 h-5 ${hotspot.trend > 0 ? 'text-green-400' : 'text-red-400'}`} />
-                    <span className={`text-xs font-bold ${hotspot.trend > 0 ? 'text-green-400' : 'text-red-400'}`}>
+                    <TrendingUp className={`w-5 h-5 ${hotspot.trend > 0 ? 'text-green-600' : 'text-red-600'}`} />
+                    <span className={`text-xs font-bold ${hotspot.trend > 0 ? 'text-green-600' : 'text-red-600'}`}>
                       {hotspot.trend > 0 ? '+' : ''}{hotspot.trend}%
                     </span>
                   </div>
@@ -158,22 +169,23 @@ export default function Trending() {
                     href={hotspot.url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="p-2 hover:bg-amber-500/20 rounded-lg transition-colors text-slate-400 hover:text-amber-300"
+                    className="p-2 hover:bg-amber-500/15 rounded-lg transition-colors text-stone-400 hover:text-orange-600"
                   >
                     <ExternalLink className="w-5 h-5" />
                   </a>
 
-                  <button className="p-2 hover:bg-amber-500/20 rounded-lg transition-colors text-slate-400 hover:text-amber-300">
+                  <button className="p-2 hover:bg-amber-500/15 rounded-lg transition-colors text-stone-400 hover:text-orange-600">
                     <Share2 className="w-5 h-5" />
                   </button>
                 </div>
               </div>
 
               {/* 时间信息 */}
-              <p className="text-xs text-slate-500">
+              <p className="text-xs text-stone-400">
                 {new Date(hotspot.timestamp).toLocaleString('zh-CN')}
               </p>
-            </div>
+              </div>
+            </MovingBorderCard>
           ))
         )}
       </div>

@@ -97,13 +97,13 @@ export default function Keywords() {
     <div className="space-y-6 animate-slide-in">
       <div className="mb-8">
         <h1 className="text-4xl font-bold mb-2">关键词管理</h1>
-        <p className="text-slate-400">添加和管理需要监控的关键词</p>
+        <p className="text-stone-500">添加和管理需要监控的关键词</p>
       </div>
 
       {/* 添加关键词 */}
-      <div className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 border border-orange-500/10 rounded-xl p-6">
+      <div className="bg-white border border-stone-200 rounded-xl p-6 shadow-sm">
         <h2 className="text-lg font-bold mb-4 flex items-center gap-2">
-          <Plus className="w-5 h-5 text-amber-400" />
+          <Plus className="w-5 h-5 text-orange-500" />
           添加新关键词
         </h2>
 
@@ -116,14 +116,14 @@ export default function Keywords() {
                 onChange={(e) => setNewKeyword(e.target.value)}
                 onKeyPress={(e) => e.key === 'Enter' && addKeyword()}
                 placeholder="输入关键词 (例如: AI编程, ChatGPT 更新)"
-                className="w-full px-4 py-3 bg-slate-900/50 border border-slate-700 rounded-lg focus:outline-none focus:border-amber-500 transition-colors text-slate-100"
+                className="w-full px-4 py-3 bg-white border border-stone-300 rounded-lg focus:outline-none focus:border-amber-500 transition-colors text-stone-800 placeholder-stone-400"
               />
             </div>
 
             <select
               value={category}
               onChange={(e) => setCategory(e.target.value)}
-              className="px-4 py-3 bg-slate-900/50 border border-slate-700 rounded-lg focus:outline-none focus:border-amber-500 transition-colors text-slate-100"
+              className="px-4 py-3 bg-white border border-stone-300 rounded-lg focus:outline-none focus:border-amber-500 transition-colors text-stone-800"
             >
               <option value="general">通用</option>
               <option value="tech">技术</option>
@@ -147,15 +147,15 @@ export default function Keywords() {
       {/* 关键词列表 */}
       <div className="space-y-3">
         {keywords.length === 0 ? (
-          <div className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 border border-orange-500/10 rounded-xl p-8 text-center">
-            <Search className="w-12 h-12 text-slate-600 mx-auto mb-3" />
-            <p className="text-slate-400">暂无关键词，添加一个开始监控吧！</p>
+          <div className="bg-white border border-stone-200 rounded-xl p-8 text-center">
+            <Search className="w-12 h-12 text-stone-300 mx-auto mb-3" />
+            <p className="text-stone-500">暂无关键词，添加一个开始监控吧！</p>
           </div>
         ) : (
           keywords.map((kw) => (
             <div
               key={kw.id}
-              className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 border border-orange-500/10 rounded-xl p-4 flex items-center justify-between card-hover"
+              className="bg-white border border-stone-200 rounded-xl p-4 flex items-center justify-between shadow-sm card-hover"
             >
               <div className="flex items-center gap-4 flex-1">
                 <button
@@ -163,23 +163,23 @@ export default function Keywords() {
                   className={`flex-shrink-0 w-6 h-6 rounded-full border-2 flex items-center justify-center transition-colors ${
                     kw.isActive
                       ? 'bg-amber-500/20 border-amber-500'
-                      : 'border-slate-600'
+                      : 'border-stone-300'
                   }`}
                 >
-                  {kw.isActive && <CheckCircle className="w-4 h-4 text-amber-400" />}
+                  {kw.isActive && <CheckCircle className="w-4 h-4 text-orange-500" />}
                 </button>
 
                 <div className="flex-1">
-                  <p className="font-semibold text-slate-100">{kw.keyword}</p>
-                  <p className="text-xs text-slate-400">
+                  <p className="font-semibold text-stone-800">{kw.keyword}</p>
+                  <p className="text-xs text-stone-500">
                     分类: {kw.category} · 最后更新: {new Date(kw.lastUpdated).toLocaleDateString('zh-CN')}
                   </p>
                 </div>
 
                 <div className={`text-xs font-semibold px-3 py-1 rounded-full ${
                   kw.isActive
-                    ? 'bg-green-500/20 text-green-400'
-                    : 'bg-slate-600/20 text-slate-400'
+                    ? 'bg-green-500/15 text-green-600'
+                    : 'bg-stone-100 text-stone-500'
                 }`}>
                   {kw.isActive ? '监控中' : '已禁用'}
                 </div>

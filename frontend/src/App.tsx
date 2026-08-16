@@ -4,7 +4,6 @@ import Dashboard from './pages/Dashboard'
 import Keywords from './pages/Keywords'
 import Trending from './pages/Trending'
 import Notifications from './pages/Notifications'
-import SkillsCenter from './pages/SkillsCenter'
 import Layout from './components/Layout'
 
 function App() {
@@ -17,7 +16,6 @@ function App() {
             <Route path="/keywords" element={<Keywords />} />
             <Route path="/trending" element={<Trending />} />
             <Route path="/notifications" element={<Notifications />} />
-            <Route path="/skills" element={<SkillsCenter />} />
           </Routes>
         </Layout>
       </Router>

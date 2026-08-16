@@ -1,20 +1,23 @@
 import { ArrowRight, Plus, TrendingUp, Bell } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
+import { Spotlight } from './ui/Spotlight'
 
 export default function OnboardingGuide() {
   const navigate = useNavigate()
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-b from-slate-950 to-slate-900 px-4">
+    <div className="relative min-h-screen flex flex-col items-center justify-center overflow-hidden bg-gradient-to-b from-stone-100 to-stone-200 px-4">
       {/* 欢迎卡片 */}
-      <div className="max-w-3xl text-center mb-16">
-        <div className="w-20 h-20 rounded-xl bg-gradient-to-r from-amber-500 to-orange-600 flex items-center justify-center mx-auto mb-8 shadow-lg shadow-orange-500/50">
+      <div className="relative max-w-3xl text-center mb-16">
+        <Spotlight className="-top-6 left-1/4" />
+        <div className="relative w-20 h-20 rounded-2xl bg-gradient-to-br from-amber-500 to-red-600 flex items-center justify-center mx-auto mb-8 shadow-lg shadow-orange-500/50">
           <TrendingUp className="w-10 h-10 text-white" />
+          <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-orange-400 animate-pulse" aria-hidden="true" />
         </div>
         
         <h1 className="text-5xl font-bold mb-4 gradient-text">欢迎使用热点监控</h1>
-        <p className="text-xl text-slate-300 mb-2">实时发现、智能分析、及时通知</p>
-        <p className="text-slate-400 mb-12">3个步骤，开始掌握热点变化</p>
+        <p className="text-xl text-stone-600 mb-2">实时发现、智能分析、及时通知</p>
+        <p className="text-stone-500 mb-12">3个步骤，开始掌握热点变化</p>
       </div>
 
       {/* 步骤流程 */}
@@ -22,15 +25,15 @@ export default function OnboardingGuide() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {/* 步骤 1：添加关键词 */}
           <div className="group">
-            <div className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 border border-orange-500/20 rounded-xl p-6 card-hover h-full">
-              <div className="w-14 h-14 rounded-lg bg-amber-500/20 border border-amber-500/50 flex items-center justify-center mb-4">
-                <Plus className="w-7 h-7 text-amber-400" />
+            <div className="bg-white border border-stone-200 rounded-xl p-6 shadow-sm card-hover h-full">
+              <div className="w-14 h-14 rounded-lg bg-amber-500/15 border border-amber-500/40 flex items-center justify-center mb-4">
+                <Plus className="w-7 h-7 text-orange-500" />
               </div>
               <h3 className="text-lg font-bold mb-2">1. 添加关键词</h3>
-              <p className="text-slate-400 text-sm leading-relaxed">
+              <p className="text-stone-500 text-sm leading-relaxed">
                 在"关键词"页面输入您想监控的热点主题，可添加多个不同分类的关键词。
               </p>
-              <div className="mt-4 pt-4 border-t border-slate-700/50 text-xs text-slate-500">
+              <div className="mt-4 pt-4 border-t border-stone-200 text-xs text-stone-400">
                 例如：AI编程、ChatGPT、技术前沿
               </div>
             </div>
@@ -43,15 +46,15 @@ export default function OnboardingGuide() {
 
           {/* 步骤 2：系统监控 */}
           <div className="group">
-            <div className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 border border-orange-500/20 rounded-xl p-6 card-hover h-full">
-              <div className="w-14 h-14 rounded-lg bg-orange-500/20 border border-orange-500/50 flex items-center justify-center mb-4 animate-pulse">
-                <TrendingUp className="w-7 h-7 text-orange-400" />
+            <div className="bg-white border border-stone-200 rounded-xl p-6 shadow-sm card-hover h-full">
+              <div className="w-14 h-14 rounded-lg bg-orange-500/15 border border-orange-500/40 flex items-center justify-center mb-4 animate-pulse">
+                <TrendingUp className="w-7 h-7 text-orange-500" />
               </div>
               <h3 className="text-lg font-bold mb-2">2. 系统监控中</h3>
-              <p className="text-slate-400 text-sm leading-relaxed">
+              <p className="text-stone-500 text-sm leading-relaxed">
                 系统自动从多个信息源收集相关热点，使用 AI 进行真实性识别和相关性评分。
               </p>
-              <div className="mt-4 pt-4 border-t border-slate-700/50 text-xs text-slate-500">
+              <div className="mt-4 pt-4 border-t border-stone-200 text-xs text-stone-400">
                 数据源：Web、Twitter、知乎、小红书
               </div>
             </div>
@@ -64,15 +67,15 @@ export default function OnboardingGuide() {
 
           {/* 步骤 3：接收通知 */}
           <div className="group">
-            <div className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 border border-orange-500/20 rounded-xl p-6 card-hover h-full">
-              <div className="w-14 h-14 rounded-lg bg-green-600/20 border border-green-500/50 flex items-center justify-center mb-4">
-                <Bell className="w-7 h-7 text-green-400" />
+            <div className="bg-white border border-stone-200 rounded-xl p-6 shadow-sm card-hover h-full">
+              <div className="w-14 h-14 rounded-lg bg-green-500/15 border border-green-500/40 flex items-center justify-center mb-4">
+                <Bell className="w-7 h-7 text-green-600" />
               </div>
               <h3 className="text-lg font-bold mb-2">3. 接收通知</h3>
-              <p className="text-slate-400 text-sm leading-relaxed">
+              <p className="text-stone-500 text-sm leading-relaxed">
                 热点匹配您的关键词时，系统立即发送浏览器通知和邮件提醒。
               </p>
-              <div className="mt-4 pt-4 border-t border-slate-700/50 text-xs text-slate-500">
+              <div className="mt-4 pt-4 border-t border-stone-200 text-xs text-stone-400">
                 方式：实时推送 + 邮件告警
               </div>
             </div>
@@ -90,11 +93,11 @@ export default function OnboardingGuide() {
             { icon: '🌍', title: '多源聚合', desc: '覆盖全网热点' },
             { icon: '⚡', title: '实时推送', desc: '第一时间获知信息' },
           ].map((feature, idx) => (
-            <div key={idx} className="flex items-start gap-3 p-4 rounded-lg bg-slate-800/30 border border-slate-700/50">
+            <div key={idx} className="flex items-start gap-3 p-4 rounded-lg bg-white border border-stone-200">
               <span className="text-2xl flex-shrink-0">{feature.icon}</span>
               <div>
-                <p className="font-semibold text-slate-100">{feature.title}</p>
-                <p className="text-sm text-slate-400">{feature.desc}</p>
+                <p className="font-semibold text-stone-800">{feature.title}</p>
+                <p className="text-sm text-stone-500">{feature.desc}</p>
               </div>
             </div>
           ))}
@@ -123,8 +126,8 @@ export default function OnboardingGuide() {
 
       {/* 底部提示 */}
       <div className="mt-16 max-w-2xl text-center">
-        <div className="p-4 rounded-lg bg-amber-600/10 border border-amber-500/20">
-          <p className="text-sm text-slate-300">
+        <div className="p-4 rounded-lg bg-amber-500/10 border border-amber-500/20">
+          <p className="text-sm text-stone-600">
             💡 <strong>提示：</strong> 系统会每30分钟自动检查一次热点变化，也可随时点击"立即检查"手动触发。首次使用建议添加 2-3 个感兴趣的关键词。
           </p>
         </div>
