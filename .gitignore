@@ -11,3 +11,6 @@ build/
 coverage/
 .next/
 out/
+
+# 运行时数据（后台爬虫自动生成，不应纳入版本控制）
+backend/src/data/
