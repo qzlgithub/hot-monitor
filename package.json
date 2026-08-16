@@ -1,0 +1,7 @@
+{
+  "name": "qzl_hot_monitor",
+  "version": "0.1.0",
+  "description": "一个轻量级的实时热点监控工具",
+  "private": true,
+  "type": "module"
+}
