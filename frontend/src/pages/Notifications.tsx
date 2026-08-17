@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Bell, Trash2, CheckCircle, AlertCircle, ExternalLink } from 'lucide-react'
 import { toast } from 'sonner'
+import { getSourceMeta } from '../utils/helpers'
 
 interface Notification {
   id: string
@@ -151,15 +152,11 @@ export default function Notifications() {
                     : 'bg-teal-500/20'
                 }`}>
                   {notification.type === 'warning' ? (
-                    <AlertCircle className={`w-5 h-5 ${
-                      notification.type === 'success'
-                        ? 'text-green-400'
-                        : notification.type === 'warning'
-                        ? 'text-yellow-400'
-                        : 'text-teal-400'
-                    }`} />
+                    <AlertCircle className="w-5 h-5 text-yellow-400" />
+                  ) : notification.type === 'success' ? (
+                    <CheckCircle className="w-5 h-5 text-green-400" />
                   ) : (
-                    <CheckCircle className={`w-5 h-5 text-green-400`} />
+                    <CheckCircle className="w-5 h-5 text-teal-400" />
                   )}
                 </div>
 
@@ -191,7 +188,7 @@ export default function Notifications() {
                       关键词: {notification.keyword}
                     </span>
                     <span className="bg-stone-100 px-2 py-1 rounded">
-                      来源: {notification.source}
+                      来源: {getSourceMeta(notification.source).label}
                     </span>
                     <span>
                       {new Date(notification.timestamp).toLocaleString('zh-CN')}

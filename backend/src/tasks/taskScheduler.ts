@@ -1,17 +1,15 @@
 import cron from 'node-cron'
-import { dataStore } from '../services/dataStore.js'
-import { webScraperService } from '../services/webScraperService.js'
-import { twitterService } from '../services/twitterService.js'
+import { dataStore, type TrendingVideo } from '../services/dataStore.js'
 import { deepSeekService } from '../services/deepseekService.js'
 import { notificationService } from '../services/notificationService.js'
 import config from '../config/index.js'
+import { getEnabledSources, type SourceItem } from '../services/sources/index.js'
 
 class TaskScheduler {
   private hotspotTaskRunning = false
   private notificationTaskRunning = false
   private lastHotspotRun: string | null = null
   private lastNotificationRun: string | null = null
-  private webScraperService = webScraperService
 
   startTasks() {
     console.log('Starting task scheduler...')
@@ -84,8 +82,8 @@ class TaskScheduler {
         await this.fetchHotspotsForKeyword(kw.keyword, kw.category)
       }
 
-      // 也收集不针对特定关键词的热点
-      await this.collectTrendingHotspots()
+      // 收集各数据源的「热门发现」板块（如 B 站全站热门）
+      await this.collectTrendingFromSources()
 
       console.log('✓ Hotspot collection completed')
     } catch (error) {
@@ -97,58 +95,43 @@ class TaskScheduler {
 
   private async fetchHotspotsForKeyword(keyword: string, category: string) {
     try {
-      // 按配置动态收集已启用的数据源
-      const sources: { results: any[]; source: string }[] = []
-      const { sources: srcConfig } = config
-
-      // Web 搜索（内部按 config 控制百度/Google）
-      const webResults = await this.webScraperService.searchKeyword(keyword).catch(() => [])
-      sources.push({ results: webResults, source: 'Web' })
-
-      // Twitter（需 TWITTER_ENABLED=true 并填 key）
-      if (srcConfig.twitter.enabled) {
-        const twitterResults = await twitterService.searchTweets(keyword, 20).catch(() => [])
-        sources.push({
-          results: twitterResults.map(t => ({
-            title: t.text.substring(0, 100),
-            description: t.text,
-            url: `https://twitter.com/i/web/status/${t.id}`,
-            source: 'Twitter',
-            timestamp: t.created_at,
-          })),
-          source: 'Twitter',
-        })
+      // 通过「数据源注册表」统一收集所有已启用数据源的关键词结果
+      const collected: SourceItem[] = []
+      for (const adapter of getEnabledSources()) {
+        const items = await adapter.search(keyword, 20).catch(() => [] as SourceItem[])
+        collected.push(...items)
       }
 
-      // 知乎（需 ZHIHU_ENABLED=true 并填 cookie）
-      if (srcConfig.zhihu.enabled) {
-        const zhihuResults = await this.webScraperService.scrapeZhihu().catch(() => [])
-        sources.push({ results: zhihuResults, source: 'Zhihu' })
-      }
+      for (const item of collected) {
+        // 使用 DeepSeek AI 识别真实热点
+        const analysis = await deepSeekService.analyzeHotspot(
+          item.title,
+          item.description,
+          [keyword]
+        )
 
-      for (const { results } of sources) {
-        for (const item of results) {
-          // 使用 DeepSeek AI 识别真实热点
-          const analysis = await deepSeekService.analyzeHotspot(
-            item.title,
-            item.description,
-            [keyword]
-          )
+        // 内容平台（B站等，已通过播放量门槛过滤）：相关性达标即可入库；
+        // 其他来源（新闻/搜索）仍要求 isRealTrend 真实热点判断
+        const isPlatform = item.source === 'Bilibili'
+        const minScore = config.ai.minScore
+        const pass = isPlatform
+          ? analysis.relevanceScore >= minScore
+          : (analysis.isRealTrend && analysis.relevanceScore >= minScore)
 
-          if (analysis.isRealTrend && analysis.relevanceScore >= 5) {
-            // 添加热点
-            await dataStore.addHotspot({
-              title: item.title,
-              description: item.description,
-              source: item.source || 'Unknown',
-              category: analysis.category,
-              score: analysis.relevanceScore,
-              trend: Math.random() > 0.5 ? Math.round(Math.random() * 100) - 50 : 0,
-              url: item.url,
-              timestamp: item.timestamp || new Date().toISOString(),
-              keywords: [keyword],
-            })
-          }
+        if (pass) {
+          // 添加热点
+          await dataStore.addHotspot({
+            title: item.title,
+            description: item.description,
+            source: item.source || 'Unknown',
+            category: analysis.category,
+            score: analysis.relevanceScore,
+            // 有真实热度（如 B 站播放量）则用它，否则保留原有随机趋势
+            trend: item.trend ?? (Math.random() > 0.5 ? Math.round(Math.random() * 100) - 50 : 0),
+            url: item.url,
+            timestamp: item.timestamp || new Date().toISOString(),
+            keywords: [keyword],
+          })
         }
       }
     } catch (error) {
@@ -156,43 +139,32 @@ class TaskScheduler {
     }
   }
 
-  private async collectTrendingHotspots() {
-    // 未启用 Twitter 数据源时跳过（避免 mock 数据污染）
-    if (!config.sources.twitter.enabled) {
-      return
-    }
+  // 收集各数据源的「热门发现」板块（实现了 fetchTrending 的源）→ 存入独立板块（与关键词热点分开）
+  private async collectTrendingFromSources() {
+    for (const adapter of getEnabledSources()) {
+      if (!adapter.fetchTrending) continue
 
-    try {
-      // 收集Twitter热点
-      const trendingTags = await twitterService.getTrendingHashtags()
-      for (const tag of trendingTags.slice(0, 5)) {
-        const cleanTag = tag.replace('#', '')
-        const tweets = await twitterService.searchTweets(cleanTag, 10)
+      try {
+        const items = await adapter.fetchTrending(20)
+        if (items.length === 0) continue
 
-        for (const tweet of tweets) {
-          const analysis = await deepSeekService.analyzeHotspot(
-            tweet.text,
-            tweet.text,
-            [cleanTag]
-          )
-
-          if (analysis.isRealTrend) {
-            await dataStore.addHotspot({
-              title: tweet.text.substring(0, 100),
-              description: tweet.text,
-              source: 'Twitter Trending',
-              category: analysis.category,
-              score: Math.min(analysis.relevanceScore + 2, 10),
-              trend: tweet.public_metrics.retweet_count + tweet.public_metrics.like_count,
-              url: `https://twitter.com/i/web/status/${tweet.id}`,
-              timestamp: tweet.created_at,
-              keywords: [cleanTag],
-            })
-          }
-        }
+        const videos = items.map((i): Omit<TrendingVideo, 'collectedAt'> => ({
+          id: i.id || '',
+          title: i.title,
+          description: i.description,
+          url: i.url,
+          author: i.author || '',
+          play: i.trend || 0,
+          like: i.like || 0,
+          pic: i.pic || '',
+          category: i.category || '',
+          pubdate: i.timestamp,
+        }))
+        await dataStore.saveTrendingVideos(videos)
+        console.log(`✓ Saved ${videos.length} trending videos from ${adapter.label}`)
+      } catch (error) {
+        console.error(`Error collecting trending from ${adapter.id}:`, error)
       }
-    } catch (error) {
-      console.error('Error collecting trending hotspots:', error)
     }
   }
 

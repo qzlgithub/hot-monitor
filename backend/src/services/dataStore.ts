@@ -39,17 +39,34 @@ export interface Notification {
   url?: string
 }
 
+// B 站全站热门视频（「热门发现」板块数据，与关键词热点分开存储）
+export interface TrendingVideo {
+  id: string
+  title: string
+  description: string
+  url: string
+  author: string
+  play: number
+  like: number
+  pic: string
+  category: string
+  pubdate: string
+  collectedAt: string
+}
+
 class DataStore {
   private dataDir: string
   private keywordsFile: string
   private hotspotsFile: string
   private notificationsFile: string
+  private trendingFile: string
 
   constructor() {
     this.dataDir = config.dataDir
     this.keywordsFile = path.join(this.dataDir, 'keywords.json')
     this.hotspotsFile = path.join(this.dataDir, 'hotspots.json')
     this.notificationsFile = path.join(this.dataDir, 'notifications.json')
+    this.trendingFile = path.join(this.dataDir, 'trending.json')
     
     this.initializeDataDir()
   }
@@ -68,6 +85,9 @@ class DataStore {
     }
     if (!fs.existsSync(this.notificationsFile)) {
       fs.writeJsonSync(this.notificationsFile, [])
+    }
+    if (!fs.existsSync(this.trendingFile)) {
+      fs.writeJsonSync(this.trendingFile, [])
     }
   }
 
@@ -165,6 +185,18 @@ class DataStore {
     const filtered = notifications.filter(n => n.id !== id)
     await fs.writeJsonSync(this.notificationsFile, filtered)
     return filtered.length < notifications.length
+  }
+
+  // 热门发现（B 站全站热门）相关
+  async getTrendingVideos(): Promise<TrendingVideo[]> {
+    return fs.readJsonSync(this.trendingFile, { throws: false }) || []
+  }
+
+  // 覆盖保存最新热门视频（每次收集整体替换，保证是最新榜单）
+  async saveTrendingVideos(videos: Omit<TrendingVideo, 'collectedAt'>[]): Promise<void> {
+    const now = new Date().toISOString()
+    const withTime = videos.map(v => ({ ...v, collectedAt: now }))
+    await fs.writeJsonSync(this.trendingFile, withTime)
   }
 }
 

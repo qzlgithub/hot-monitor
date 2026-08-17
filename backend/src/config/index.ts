@@ -11,6 +11,11 @@ dotenv.config({
 export const config = {
   port: parseInt(process.env.PORT || '3000', 10),
   nodeEnv: process.env.NODE_ENV || 'development',
+
+  // AI 检测门槛：相关性得分低于该值的候选不进入热点（默认 7，宁缺毋滥）
+  ai: {
+    minScore: parseInt(process.env.AI_MIN_SCORE || '7', 10),
+  },
   
   // DeepSeek API
   deepseek: {
@@ -18,16 +23,20 @@ export const config = {
     apiUrl: process.env.DEEPSEEK_API_URL || 'https://api.deepseek.com/v1',
   },
 
-  // Twitter API
+  // Twitter/X API（通过 twitterapi.io 第三方接口，仅需 X-API-Key，无需官方审核）
   twitter: {
     apiKey: process.env.TWITTER_API_KEY || '',
-    apiUrl: process.env.TWITTER_API_URL || 'https://api.twitter.com/2',
+    apiUrl: process.env.TWITTER_API_URL || 'https://api.twitterapi.io',
   },
 
   // 数据源配置中心（在 .env 中控制启用/停用 + 填写真实 key）
   // 只需把对应 ENABLED 改为 true 并填好 key/cookie，即可启用该数据源
   sources: {
-    baidu: { enabled: process.env.BAIDU_ENABLED !== 'false' },
+    baidu: { enabled: process.env.BAIDU_ENABLED === 'true' },
+    bilibili: {
+      enabled: process.env.BILIBILI_ENABLED !== 'false',
+      minPlay: parseInt(process.env.BILIBILI_MIN_PLAY || '50000', 10),
+    },
     google: { enabled: process.env.GOOGLE_ENABLED === 'true', apiKey: process.env.GOOGLE_API_KEY || '' },
     zhihu: { enabled: process.env.ZHIHU_ENABLED === 'true', cookie: process.env.ZHIHU_COOKIE || '' },
     twitter: { enabled: process.env.TWITTER_ENABLED === 'true', apiKey: process.env.TWITTER_API_KEY || '' },

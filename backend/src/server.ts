@@ -6,6 +6,7 @@ import dashboardRoutes from './api/dashboardRoutes.js'
 import keywordRoutes from './api/keywordRoutes.js'
 import hotspotRoutes from './api/hotspotRoutes.js'
 import notificationRoutes from './api/notificationRoutes.js'
+import trendingRoutes from './api/trendingRoutes.js'
 
 const app = express()
 
@@ -46,6 +47,7 @@ app.use('/dashboard', dashboardRoutes)
 app.use('/keywords', keywordRoutes)
 app.use('/hotspots', hotspotRoutes)
 app.use('/notifications', notificationRoutes)
+app.use('/trending', trendingRoutes)
 
 // 错误处理
 app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {

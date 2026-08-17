@@ -26,7 +26,7 @@ export function useApiWithRefresh<T>(
   refreshInterval: number = 30000
 ) {
   const [data, setData] = useState<T>(initialData)
-  const [loading, setLoading] = React.useState(false)
+  const [loading, setLoading] = useState(false)
 
   const refresh = useCallback(async () => {
     setLoading(true)
