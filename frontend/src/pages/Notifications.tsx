@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Bell, Trash2, CheckCircle, AlertCircle } from 'lucide-react'
+import { Bell, Trash2, CheckCircle, AlertCircle, ExternalLink } from 'lucide-react'
 import { toast } from 'sonner'
 
 interface Notification {
@@ -11,6 +11,7 @@ interface Notification {
   source: string
   timestamp: string
   read: boolean
+  url?: string
 }
 
 export default function Notifications() {
@@ -165,9 +166,22 @@ export default function Notifications() {
                 {/* 内容 */}
                 <div className="flex-1 min-w-0">
                   <div className="flex items-start justify-between mb-1">
-                    <h3 className="font-bold text-stone-800">{notification.title}</h3>
+                    <h3 className="font-bold text-stone-800">
+                      {notification.url ? (
+                        <a
+                          href={notification.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="hover:text-orange-600 hover:underline transition-colors"
+                        >
+                          {notification.title}
+                        </a>
+                      ) : (
+                        notification.title
+                      )}
+                    </h3>
                     {!notification.read && (
-                      <div className="w-2 h-2 rounded-full bg-amber-500 flex-shrink-0" />
+                      <div className="w-2 h-2 rounded-full bg-amber-500 flex-shrink-0 ml-2" />
                     )}
                   </div>
                   <p className="text-sm text-stone-500 mb-2">{notification.message}</p>
@@ -187,6 +201,18 @@ export default function Notifications() {
 
                 {/* 操作 */}
                 <div className="flex gap-2 flex-shrink-0">
+                  {notification.url && (
+                    <a
+                      href={notification.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="p-2 hover:bg-amber-500/15 rounded-lg transition-colors text-stone-400 hover:text-orange-600"
+                      title="查看详情"
+                    >
+                      <ExternalLink className="w-5 h-5" />
+                    </a>
+                  )}
+
                   {!notification.read && (
                     <button
                       onClick={() => markAsRead(notification.id)}

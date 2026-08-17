@@ -97,26 +97,34 @@ class TaskScheduler {
 
   private async fetchHotspotsForKeyword(keyword: string, category: string) {
     try {
-      // 从多个来源获取数据
-      const [webResults, twitterResults, zhihuResults, redbookResults] = await Promise.all([
-        this.webScraperService.searchKeyword(keyword).catch(() => []),
-        twitterService.searchTweets(keyword, 20).catch(() => []),
-        this.webScraperService.scrapeZhihu().catch(() => []),
-        this.webScraperService.scrapeRedbook().catch(() => []),
-      ])
+      // 按配置动态收集已启用的数据源
+      const sources: { results: any[]; source: string }[] = []
+      const { sources: srcConfig } = config
 
-      const sources = [
-        { results: webResults, source: 'Web' },
-        { results: twitterResults.map(t => ({
-          title: t.text.substring(0, 100),
-          description: t.text,
-          url: `https://twitter.com/i/web/status/${t.id}`,
+      // Web 搜索（内部按 config 控制百度/Google）
+      const webResults = await this.webScraperService.searchKeyword(keyword).catch(() => [])
+      sources.push({ results: webResults, source: 'Web' })
+
+      // Twitter（需 TWITTER_ENABLED=true 并填 key）
+      if (srcConfig.twitter.enabled) {
+        const twitterResults = await twitterService.searchTweets(keyword, 20).catch(() => [])
+        sources.push({
+          results: twitterResults.map(t => ({
+            title: t.text.substring(0, 100),
+            description: t.text,
+            url: `https://twitter.com/i/web/status/${t.id}`,
+            source: 'Twitter',
+            timestamp: t.created_at,
+          })),
           source: 'Twitter',
-          timestamp: t.created_at,
-        })), source: 'Twitter' },
-        { results: zhihuResults, source: 'Zhihu' },
-        { results: redbookResults, source: 'Xiaohongshu' },
-      ]
+        })
+      }
+
+      // 知乎（需 ZHIHU_ENABLED=true 并填 cookie）
+      if (srcConfig.zhihu.enabled) {
+        const zhihuResults = await this.webScraperService.scrapeZhihu().catch(() => [])
+        sources.push({ results: zhihuResults, source: 'Zhihu' })
+      }
 
       for (const { results } of sources) {
         for (const item of results) {
@@ -149,6 +157,11 @@ class TaskScheduler {
   }
 
   private async collectTrendingHotspots() {
+    // 未启用 Twitter 数据源时跳过（避免 mock 数据污染）
+    if (!config.sources.twitter.enabled) {
+      return
+    }
+
     try {
       // 收集Twitter热点
       const trendingTags = await twitterService.getTrendingHashtags()
@@ -199,7 +212,10 @@ class TaskScheduler {
       const hotspots = await dataStore.getHotspots()
       const existingNotifications = await dataStore.getNotifications()
 
-      const notifiedHotspotIds = new Set(existingNotifications.map(n => n.id))
+      // 已通知过的热点 id（按 hotspotId 去重，避免重复通知）
+      const notifiedHotspotIds = new Set(
+        existingNotifications.map(n => n.hotspotId).filter(Boolean)
+      )
 
       for (const kw of keywords) {
         if (!kw.isActive) continue
@@ -209,7 +225,7 @@ class TaskScheduler {
         )
 
         for (const hotspot of relevantHotspots) {
-          // 创建通知
+          // 创建通知（记录 hotspotId 用于去重 + url 用于跳转详情）
           const notification = await dataStore.addNotification({
             title: hotspot.title,
             message: `"${kw.keyword}" 相关的新热点已发现`,
@@ -218,6 +234,8 @@ class TaskScheduler {
             source: hotspot.source,
             timestamp: new Date().toISOString(),
             read: false,
+            hotspotId: hotspot.id,
+            url: hotspot.url,
           })
 
           // 发送邮件通知（可选）

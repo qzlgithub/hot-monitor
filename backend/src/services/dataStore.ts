@@ -35,6 +35,8 @@ export interface Notification {
   source: string
   timestamp: string
   read: boolean
+  hotspotId?: string
+  url?: string
 }
 
 class DataStore {

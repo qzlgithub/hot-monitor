@@ -5,7 +5,7 @@ import { fileURLToPath } from 'url'
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
 dotenv.config({
-  path: path.resolve(__dirname, '../.env'),
+  path: path.resolve(__dirname, '../../.env'),
 })
 
 export const config = {
@@ -22,6 +22,15 @@ export const config = {
   twitter: {
     apiKey: process.env.TWITTER_API_KEY || '',
     apiUrl: process.env.TWITTER_API_URL || 'https://api.twitter.com/2',
+  },
+
+  // 数据源配置中心（在 .env 中控制启用/停用 + 填写真实 key）
+  // 只需把对应 ENABLED 改为 true 并填好 key/cookie，即可启用该数据源
+  sources: {
+    baidu: { enabled: process.env.BAIDU_ENABLED !== 'false' },
+    google: { enabled: process.env.GOOGLE_ENABLED === 'true', apiKey: process.env.GOOGLE_API_KEY || '' },
+    zhihu: { enabled: process.env.ZHIHU_ENABLED === 'true', cookie: process.env.ZHIHU_COOKIE || '' },
+    twitter: { enabled: process.env.TWITTER_ENABLED === 'true', apiKey: process.env.TWITTER_API_KEY || '' },
   },
 
   // Email

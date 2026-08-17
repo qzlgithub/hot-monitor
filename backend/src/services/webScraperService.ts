@@ -1,6 +1,7 @@
 import axios from 'axios'
 import * as cheerio from 'cheerio'
 import { v4 as uuid } from 'uuid'
+import config from '../config/index.js'
 
 interface ScrapedContent {
   title: string
@@ -97,22 +98,34 @@ class WebScraperService {
     }
   }
 
-  // 从搜索引擎结果爬取
+  // 从搜索引擎结果爬取（按 config.sources 控制启用的引擎）
   async searchKeyword(keyword: string): Promise<ScrapedContent[]> {
     const results: ScrapedContent[] = []
+    const { sources } = config
 
-    // 模拟搜索结果（实际应使用搜索引擎API或爬虫）
-    const searchUrls = [
-      `https://www.google.com/search?q=${encodeURIComponent(keyword)}`,
-      `https://www.baidu.com/s?wd=${encodeURIComponent(keyword)}`,
-    ]
-
-    for (const searchUrl of searchUrls) {
+    // 百度搜索（默认启用，无需 key）
+    if (sources.baidu.enabled) {
       try {
-        const content = await this.scrapeWebsite(searchUrl, keyword)
+        const content = await this.scrapeWebsite(
+          `https://www.baidu.com/s?wd=${encodeURIComponent(keyword)}`,
+          keyword
+        )
         results.push(...content)
       } catch (error) {
-        console.error(`Search failed for ${keyword}:`, error)
+        console.error(`Baidu search failed for ${keyword}:`, error)
+      }
+    }
+
+    // Google 搜索（需在 .env 设置 GOOGLE_ENABLED=true 并填 key 后启用）
+    if (sources.google.enabled && sources.google.apiKey) {
+      try {
+        const content = await this.scrapeWebsite(
+          `https://www.google.com/search?q=${encodeURIComponent(keyword)}`,
+          keyword
+        )
+        results.push(...content)
+      } catch (error) {
+        console.error(`Google search failed for ${keyword}:`, error)
       }
     }
 
