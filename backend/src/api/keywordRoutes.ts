@@ -1,5 +1,6 @@
 import { Router, Request, Response } from 'express'
 import { dataStore } from '../services/dataStore.js'
+import { keywordExpansionService } from '../services/keywordExpansionService.js'
 
 const router = Router()
 
@@ -19,11 +20,11 @@ router.post('/', async (req: Request, res: Response) => {
   try {
     const { keyword, category } = req.body
 
-    if (!keyword || !category) {
+    if (!keyword) {
       return res.status(400).json({ error: 'Missing required fields' })
     }
 
-    const newKeyword = await dataStore.addKeyword(keyword, category)
+    const newKeyword = await dataStore.addKeyword(keyword, category || 'general')
     res.status(201).json(newKeyword)
   } catch (error) {
     console.error('Error adding keyword:', error)
@@ -63,6 +64,30 @@ router.delete('/:id', async (req: Request, res: Response) => {
   } catch (error) {
     console.error('Error deleting keyword:', error)
     res.status(500).json({ error: 'Failed to delete keyword' })
+  }
+})
+
+// 重新生成搜索变体（关键词扩展）：调用 LLM 生成新的变体列表并回写
+router.post('/:id/expand', async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params
+    const keywords = await dataStore.getKeywords()
+    const kw = keywords.find((k) => k.id === id)
+
+    if (!kw) {
+      return res.status(404).json({ error: 'Keyword not found' })
+    }
+
+    const expansions = await keywordExpansionService.expand(kw.keyword)
+    await dataStore.updateKeyword(id, {
+      expansions,
+      lastUpdated: new Date().toISOString(),
+    })
+
+    res.json({ success: true, expansions })
+  } catch (error) {
+    console.error('Error expanding keyword:', error)
+    res.status(500).json({ error: 'Failed to expand keyword' })
   }
 })
 

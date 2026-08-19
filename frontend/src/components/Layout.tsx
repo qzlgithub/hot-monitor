@@ -1,6 +1,6 @@
 import { ReactNode, useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
-import { Flame, Plus, TrendingUp, Bell, Menu, X } from 'lucide-react'
+import { Flame, Plus, TrendingUp, Menu, X } from 'lucide-react'
 
 interface LayoutProps {
   children: ReactNode
@@ -11,10 +11,8 @@ export default function Layout({ children }: LayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false)
 
   const navItems = [
-    { href: '/', label: '仪表盘', icon: Flame },
+    { href: '/trending', label: '热点雷达', icon: TrendingUp },
     { href: '/keywords', label: '关键词', icon: Plus },
-    { href: '/trending', label: '热点', icon: TrendingUp },
-    { href: '/notifications', label: '通知', icon: Bell },
   ]
 
   const closeSidebar = () => setSidebarOpen(false)

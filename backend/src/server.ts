@@ -1,12 +1,10 @@
 import express from 'express'
 import cors from 'cors'
 import config from './config/index.js'
+import { dataStore } from './services/dataStore.js'
 import { taskScheduler } from './tasks/taskScheduler.js'
-import dashboardRoutes from './api/dashboardRoutes.js'
 import keywordRoutes from './api/keywordRoutes.js'
 import hotspotRoutes from './api/hotspotRoutes.js'
-import notificationRoutes from './api/notificationRoutes.js'
-import trendingRoutes from './api/trendingRoutes.js'
 
 const app = express()
 
@@ -43,11 +41,8 @@ app.post('/tasks/check', (req, res) => {
 })
 
 // API 路由
-app.use('/dashboard', dashboardRoutes)
 app.use('/keywords', keywordRoutes)
 app.use('/hotspots', hotspotRoutes)
-app.use('/notifications', notificationRoutes)
-app.use('/trending', trendingRoutes)
 
 // 错误处理
 app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
@@ -66,6 +61,11 @@ app.listen(port, () => {
 
   // 启动任务调度器
   taskScheduler.startTasks()
+
+  // 一次性清理历史遗留的重复热点（服务重启即生效，与收集时的去重互补）
+  dataStore.dedupeHotspots().catch((err) =>
+    console.error('初始热点去重失败:', err)
+  )
 })
 
 export default app

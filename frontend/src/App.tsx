@@ -1,9 +1,7 @@
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
 import { Toaster } from 'sonner'
-import Dashboard from './pages/Dashboard'
 import Keywords from './pages/Keywords'
 import Trending from './pages/Trending'
-import Notifications from './pages/Notifications'
 import Layout from './components/Layout'
 
 function App() {
@@ -12,10 +10,9 @@ function App() {
       <Router>
         <Layout>
           <Routes>
-            <Route path="/" element={<Dashboard />} />
+            <Route path="/" element={<Navigate to="/trending" replace />} />
             <Route path="/keywords" element={<Keywords />} />
             <Route path="/trending" element={<Trending />} />
-            <Route path="/notifications" element={<Notifications />} />
           </Routes>
         </Layout>
       </Router>

@@ -1,20 +1,14 @@
 # 🔥 热点监控系统 - Hot Monitor
 
-一个轻量级的实时热点监控工具，集成 AI 识别、多源数据爬虫、和智能通知系统。
+一个轻量级的实时热点监控工具：关键词监控 → 数据源搜索 → DeepSeek AI 识别过滤 → 热点雷达展示。
 
 ## ✨ 核心功能
 
-- **关键词监控**: 用户输入关键词，系统自动监控相关热点变化
-- **多源数据获取**: 
-  - 网页爬虫（新闻网站、社交平台）
-  - Twitter/X API 集成
-  - RSS 源聚合
-  - 知乎、小红书等热点爬取
-- **AI 识别引擎**: 使用 DeepSeek API 识别真实热点，过滤虚假内容
-- **智能通知**: 
-  - 浏览器 Web Notifications
-  - 邮件告警
-  - 实时通知中心
+- **关键词监控**: 添加关键词，系统自动从多个搜索变体收集相关热点
+- **关键词扩展**: 用 DeepSeek 自动生成搜索变体（如「鱼皮的AI导航」→「程序员鱼皮的AI导航」「AI导航鱼皮」等），提高召回率
+- **AI 识别引擎**: DeepSeek 判断热点相关性、是否直接提及关键词、直接/间接相关，并输出关联理由
+- **热点雷达**: 统计概览（总热数/今日新增/紧急热点/监控词）、按关键词分组 Tab、综合热度/最新/相关性排序、默认展示 10 条可展开
+- **关键词开关**: 滑动开关一键启用/停用监控关键词，停用关键词的热点自动隐藏
 - **响应式设计**: 完全兼容各类设备的独特 UI 界面
 
 ## 🚀 快速开始
@@ -48,19 +42,20 @@ NODE_ENV=development
 DEEPSEEK_API_KEY=your_api_key_here
 DEEPSEEK_API_URL=https://api.deepseek.com/v1
 
-# Twitter/X API (从 https://twitterapi.io 获取)
-TWITTER_API_KEY=your_api_key_here
-TWITTER_API_URL=https://api.twitter.com/2
+# 数据源开关
+BILIBILI_ENABLED=true
+BILIBILI_MIN_PLAY=10000        # B站播放量门槛
+BAIDU_ENABLED=false
 
-# 邮件配置 (可选)
-SMTP_HOST=smtp.gmail.com
-SMTP_PORT=587
-SMTP_USER=your_email@gmail.com
-SMTP_PASS=your_app_password
+# AI 相关性门槛
+AI_MIN_SCORE=6
 
-# 定时任务间隔 (分钟)
-HOTSPOT_FETCH_INTERVAL=15
-NOTIFICATION_CHECK_INTERVAL=5
+# 关键词扩展（DeepSeek 生成搜索变体提高召回）
+KEYWORD_EXPANSION_ENABLED=true
+KEYWORD_EXPANSION_COUNT=5
+
+# 定时收集间隔 (分钟)
+HOTSPOT_FETCH_INTERVAL=30
 ```
 
 ### 开发模式
@@ -110,12 +105,11 @@ qzl_hot_MONTIOR/
 │   ├── src/
 │   │   ├── api/              # API 路由
 │   │   ├── services/         # 业务逻辑
-│   │   │   ├── dataStore.ts         # 数据存储
-│   │   │   ├── deepseekService.ts   # AI 服务
-│   │   │   ├── webScraperService.ts # 爬虫
-│   │   │   ├── twitterService.ts    # Twitter API
-│   │   │   └── notificationService.ts # 通知
-│   │   ├── tasks/            # 定时任务
+│   │   │   ├── dataStore.ts            # 数据存储（关键词/热点）
+│   │   │   ├── deepseekService.ts      # AI 分析服务
+│   │   │   ├── keywordExpansionService.ts # 关键词扩展
+│   │   │   └── sources/                # 数据源适配器（bilibili 等）
+│   │   ├── tasks/            # 定时任务（热点收集）
 │   │   ├── config/           # 配置文件
 │   │   └── server.ts         # 服务器入口
 │   ├── .env.example

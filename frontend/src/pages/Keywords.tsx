@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Plus, X, Search, CheckCircle } from 'lucide-react'
+import { Plus, X, Search, RefreshCw } from 'lucide-react'
 import { toast } from 'sonner'
 
 interface Keyword {
@@ -9,12 +9,12 @@ interface Keyword {
   createdAt: string
   lastUpdated: string
   isActive: boolean
+  expansions?: string[]
 }
 
 export default function Keywords() {
   const [keywords, setKeywords] = useState<Keyword[]>([])
   const [newKeyword, setNewKeyword] = useState('')
-  const [category, setCategory] = useState('general')
   const [loading, setLoading] = useState(false)
 
   useEffect(() => {
@@ -45,13 +45,12 @@ export default function Keywords() {
       const response = await fetch('/api/keywords', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ keyword: newKeyword, category }),
+        body: JSON.stringify({ keyword: newKeyword }),
       })
 
       if (response.ok) {
         toast.success(`✅ 已添加关键词: ${newKeyword}`)
         setNewKeyword('')
-        setCategory('general')
         fetchKeywords()
       } else {
         toast.error('❌ 添加失败')
@@ -93,6 +92,43 @@ export default function Keywords() {
     }
   }
 
+  // 重新生成搜索变体（调用 DeepSeek，提高召回率）
+  const regenerateVariants = async (id: string) => {
+    try {
+      const response = await fetch(`/api/keywords/${id}/expand`, { method: 'POST' })
+      if (response.ok) {
+        const data = await response.json()
+        toast.success(`已生成 ${data.expansions?.length || 0} 个搜索变体`)
+        fetchKeywords()
+      } else {
+        toast.error('重新生成失败')
+      }
+    } catch (error) {
+      console.error('Failed to expand keyword:', error)
+      toast.error('重新生成失败')
+    }
+  }
+
+  // 删除单个搜索变体
+  const deleteVariant = async (id: string, variant: string) => {
+    try {
+      const kw = keywords.find((k) => k.id === id)
+      const expansions = (kw?.expansions || []).filter((v) => v !== variant)
+      const response = await fetch(`/api/keywords/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ expansions }),
+      })
+
+      if (response.ok) {
+        toast.success('已删除该变体')
+        fetchKeywords()
+      }
+    } catch (error) {
+      console.error('Failed to delete variant:', error)
+    }
+  }
+
   return (
     <div className="space-y-6 animate-slide-in">
       <div className="mb-8">
@@ -120,19 +156,6 @@ export default function Keywords() {
               />
             </div>
 
-            <select
-              value={category}
-              onChange={(e) => setCategory(e.target.value)}
-              className="px-4 py-3 bg-white border border-stone-300 rounded-lg focus:outline-none focus:border-amber-500 transition-colors text-stone-800"
-            >
-              <option value="general">通用</option>
-              <option value="tech">技术</option>
-              <option value="finance">金融</option>
-              <option value="entertainment">娱乐</option>
-              <option value="sports">体育</option>
-              <option value="other">其他</option>
-            </select>
-
             <button
               onClick={addKeyword}
               disabled={loading}
@@ -159,21 +182,54 @@ export default function Keywords() {
             >
               <div className="flex items-center gap-4 flex-1">
                 <button
+                  role="switch"
+                  aria-checked={kw.isActive}
+                  aria-label={`${kw.isActive ? '关闭' : '开启'}关键词 ${kw.keyword}`}
                   onClick={() => toggleKeyword(kw.id, kw.isActive)}
-                  className={`flex-shrink-0 w-6 h-6 rounded-full border-2 flex items-center justify-center transition-colors ${
+                  className={`relative flex-shrink-0 w-11 h-6 rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2 ${
                     kw.isActive
-                      ? 'bg-amber-500/20 border-amber-500'
-                      : 'border-stone-300'
+                      ? 'bg-gradient-to-r from-amber-500 to-orange-600'
+                      : 'bg-stone-300'
                   }`}
                 >
-                  {kw.isActive && <CheckCircle className="w-4 h-4 text-orange-500" />}
+                  <span
+                    className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform ${
+                      kw.isActive ? 'translate-x-5' : ''
+                    }`}
+                  />
                 </button>
 
-                <div className="flex-1">
+                <div className="flex-1 min-w-0">
                   <p className="font-semibold text-stone-800">{kw.keyword}</p>
                   <p className="text-xs text-stone-500">
-                    分类: {kw.category} · 最后更新: {new Date(kw.lastUpdated).toLocaleDateString('zh-CN')}
+                    最后更新: {new Date(kw.lastUpdated).toLocaleDateString('zh-CN')}
                   </p>
+
+                  {/* 搜索变体（关键词扩展） */}
+                  <div className="mt-2 flex items-center gap-1.5 flex-wrap">
+                    {(kw.expansions || []).map((v) => (
+                      <span
+                        key={v}
+                        className="inline-flex items-center gap-1 text-xs bg-stone-100 text-stone-600 px-2 py-0.5 rounded-full"
+                      >
+                        {v}
+                        <button
+                          onClick={() => deleteVariant(kw.id, v)}
+                          className="hover:text-red-500 transition-colors"
+                          aria-label={`删除变体 ${v}`}
+                        >
+                          <X className="w-3 h-3" />
+                        </button>
+                      </span>
+                    ))}
+                    <button
+                      onClick={() => regenerateVariants(kw.id)}
+                      className="inline-flex items-center gap-1 text-xs font-semibold text-amber-600 hover:text-orange-600 transition-colors"
+                    >
+                      <RefreshCw className="w-3 h-3" />
+                      {kw.expansions?.length ? '重新生成' : '生成搜索变体'}
+                    </button>
+                  </div>
                 </div>
 
                 <div className={`text-xs font-semibold px-3 py-1 rounded-full ${

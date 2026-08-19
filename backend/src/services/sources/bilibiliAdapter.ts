@@ -25,8 +25,4 @@ export const bilibiliAdapter: SourceAdapter = {
     const list = await bilibiliService.searchVideos(keyword, limit)
     return list.map(toItem)
   },
-  async fetchTrending(limit = 20): Promise<SourceItem[]> {
-    const list = await bilibiliService.getPopularVideos(1, limit)
-    return list.map(toItem)
-  },
 }

@@ -16,6 +16,12 @@ export const config = {
   ai: {
     minScore: parseInt(process.env.AI_MIN_SCORE || '7', 10),
   },
+
+  // 关键词扩展（DeepSeek 生成搜索变体，提高召回率）
+  keywordExpansion: {
+    enabled: process.env.KEYWORD_EXPANSION_ENABLED !== 'false',
+    variantCount: parseInt(process.env.KEYWORD_EXPANSION_COUNT || '5', 10),
+  },
   
   // DeepSeek API
   deepseek: {
@@ -42,22 +48,12 @@ export const config = {
     twitter: { enabled: process.env.TWITTER_ENABLED === 'true', apiKey: process.env.TWITTER_API_KEY || '' },
   },
 
-  // Email
-  smtp: {
-    host: process.env.SMTP_HOST || 'smtp.gmail.com',
-    port: parseInt(process.env.SMTP_PORT || '587', 10),
-    user: process.env.SMTP_USER || '',
-    pass: process.env.SMTP_PASS || '',
-    from: process.env.SMTP_FROM || 'noreply@hotmonitor.local',
-  },
-
   // Data Storage
   dataDir: process.env.DATA_DIR || path.resolve(__dirname, '../data'),
 
   // Tasks
   tasks: {
     hotspotFetchInterval: parseInt(process.env.HOTSPOT_FETCH_INTERVAL || '30', 10),
-    notificationCheckInterval: parseInt(process.env.NOTIFICATION_CHECK_INTERVAL || '5', 10),
   },
 }
 

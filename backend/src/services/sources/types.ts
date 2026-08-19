@@ -20,6 +20,4 @@ export interface SourceAdapter {
   isEnabled(): boolean
   // 关键词搜索（必选）：返回与关键词相关的条目
   search(keyword: string, limit: number): Promise<SourceItem[]>
-  // 热门 / 榜单（可选）：实现后会自动进入「热门发现」板块
-  fetchTrending?(limit: number): Promise<SourceItem[]>
 }
