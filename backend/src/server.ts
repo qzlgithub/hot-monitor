@@ -5,6 +5,7 @@ import { dataStore } from './services/dataStore.js'
 import { taskScheduler } from './tasks/taskScheduler.js'
 import keywordRoutes from './api/keywordRoutes.js'
 import hotspotRoutes from './api/hotspotRoutes.js'
+import cbgRoutes from './api/cbgRoutes.js'
 
 const app = express()
 
@@ -43,6 +44,7 @@ app.post('/tasks/check', (req, res) => {
 // API 路由
 app.use('/keywords', keywordRoutes)
 app.use('/hotspots', hotspotRoutes)
+app.use(cbgRoutes) // 内部已含 /cbg 前缀
 
 // 错误处理
 app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {

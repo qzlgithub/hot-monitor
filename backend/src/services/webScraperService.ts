@@ -1,7 +1,7 @@
-import axios from 'axios'
 import * as cheerio from 'cheerio'
 import { v4 as uuid } from 'uuid'
 import config from '../config/index.js'
+import { apiFetcher, htmlFetcher } from './fetchers/index.js'
 
 interface ScrapedContent {
   title: string
@@ -33,12 +33,12 @@ class WebScraperService {
   // 从指定网站爬取热点
   async scrapeWebsite(url: string, keyword: string): Promise<ScrapedContent[]> {
     try {
-      const response = await axios.get(url, {
+      const html = await htmlFetcher.fetchHtml(url, {
         headers: { 'User-Agent': this.userAgent },
         timeout: 10000,
       })
 
-      const $ = cheerio.load(response.data)
+      const $ = cheerio.load(html)
       const results: ScrapedContent[] = []
 
       // 查找包含关键词的标题
@@ -67,12 +67,12 @@ class WebScraperService {
   // 从RSS源爬取
   async scrapeRSS(rssUrl: string, keyword: string): Promise<ScrapedContent[]> {
     try {
-      const response = await axios.get(rssUrl, {
+      const html = await htmlFetcher.fetchHtml(rssUrl, {
         headers: { 'User-Agent': this.userAgent },
         timeout: 10000,
       })
 
-      const $ = cheerio.load(response.data, { xmlMode: true })
+      const $ = cheerio.load(html, { xmlMode: true })
       const results: ScrapedContent[] = []
 
       $('item').each((_, element) => {
@@ -154,13 +154,13 @@ class WebScraperService {
   async scrapeZhihu(): Promise<ScrapedContent[]> {
     try {
       // 知乎实时热搜 API
-      const response = await axios.get('https://www.zhihu.com/api/v3/feed/topstory/hot-lists/total', {
+      const response = await apiFetcher.get<any>('https://www.zhihu.com/api/v3/feed/topstory/hot-lists/total', undefined, {
         headers: { 'User-Agent': this.userAgent },
         timeout: 10000,
       })
 
       const results: ScrapedContent[] = []
-      const data = response.data.data || []
+      const data = response.data || []
 
       data.slice(0, 20).forEach((item: any) => {
         results.push({
@@ -183,12 +183,12 @@ class WebScraperService {
   async scrapeRedbook(): Promise<ScrapedContent[]> {
     try {
       // 小红书热搜页面
-      const response = await axios.get('https://www.xiaohongshu.com/explore', {
+      const html = await htmlFetcher.fetchHtml('https://www.xiaohongshu.com/explore', {
         headers: { 'User-Agent': this.userAgent },
         timeout: 10000,
       })
 
-      const $ = cheerio.load(response.data)
+      const $ = cheerio.load(html)
       const results: ScrapedContent[] = []
 
       // 提取热搜词汇

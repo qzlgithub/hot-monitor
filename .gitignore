@@ -14,3 +14,5 @@ out/
 
 # 运行时数据（后台爬虫自动生成，不应纳入版本控制）
 backend/src/data/
+# 运行时临时产物（截图/脚本输出）
+backend/data/

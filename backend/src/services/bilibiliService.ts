@@ -1,5 +1,5 @@
-import axios from 'axios'
 import config from '../config/index.js'
+import { apiFetcher } from './fetchers/index.js'
 
 // B 站视频统一结构（供 taskScheduler / 其他服务使用）
 export interface BiliVideo {
@@ -59,13 +59,13 @@ class BilibiliService {
 
     for (let pn = 1; pn <= maxPages && results.length < pageSize; pn++) {
       try {
-        const response = await axios.get(`${this.baseUrl}/x/web-interface/search/all/v2`, {
-          params: { keyword, pn },
-          headers: this.headers(),
-          timeout: 15000,
-        })
+        const data = await apiFetcher.get<any>(
+          `${this.baseUrl}/x/web-interface/search/all/v2`,
+          { keyword, pn },
+          { headers: this.headers(), timeout: 15000 }
+        )
 
-        const blocks = response.data?.data?.result
+        const blocks = data?.data?.result
         if (!Array.isArray(blocks)) break
 
         const videoBlock = blocks.find((b: any) => b.result_type === 'video')

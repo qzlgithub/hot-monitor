@@ -9,6 +9,7 @@
 - **AI 识别引擎**: DeepSeek 判断热点相关性、是否直接提及关键词、直接/间接相关，并输出关联理由
 - **热点雷达**: 统计概览（总热数/今日新增/紧急热点/监控词）、按关键词分组 Tab、综合热度/最新/相关性排序、默认展示 10 条可展开
 - **关键词开关**: 滑动开关一键启用/停用监控关键词，停用关键词的热点自动隐藏
+- **藏宝阁监控**: 梦幻西游藏宝阁珍品/召唤兽价格监控（Playwright 登录 + 底层 API 直连抓取），价格历史/涨跌徽章、搜索规则可配置（3 年以上服）
 - **响应式设计**: 完全兼容各类设备的独特 UI 界面
 
 ## 🚀 快速开始
@@ -56,6 +57,12 @@ KEYWORD_EXPANSION_COUNT=5
 
 # 定时收集间隔 (分钟)
 HOTSPOT_FETCH_INTERVAL=30
+
+# 梦幻西游藏宝阁（需登录：cd backend && npx tsx scripts/cbgLogin.ts 扫码登录导出 cookie）
+CBG_ENABLED=true
+CBG_SERVER_AGE=3y          # 3年以上服
+CBG_INTERVAL=30
+CBG_MAX_PAGES=2
 ```
 
 ### 开发模式
@@ -135,6 +142,15 @@ qzl_hot_MONTIOR/
 - `GET /hotspots` - 获取所有热点
 - `GET /hotspots/category/:category` - 按分类获取
 - `GET /hotspots/source/:source` - 按来源获取
+
+### 藏宝阁
+- `GET /cbg/stats` - 藏宝阁统计
+- `GET /cbg/items` - 商品列表（?type=equip|pet|role&limit=）
+- `GET /cbg/items/:id` - 商品详情（含价格历史）
+- `GET /cbg/search-rules` / `POST /cbg/search-rules` - 搜索规则列表 / 新增
+- `PUT /cbg/search-rules/:id` / `DELETE /cbg/search-rules/:id` - 更新 / 删除规则
+- `POST /cbg/check` - 立即采集
+- `GET /cbg/status` - 采集状态 / 登录态
 
 ### 通知
 - `GET /notifications` - 获取通知列表

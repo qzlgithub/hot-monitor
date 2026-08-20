@@ -1,6 +1,6 @@
 import { ReactNode, useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
-import { Flame, Plus, TrendingUp, Menu, X } from 'lucide-react'
+import { Flame, Plus, TrendingUp, Menu, X, Gem } from 'lucide-react'
 
 interface LayoutProps {
   children: ReactNode
@@ -12,6 +12,7 @@ export default function Layout({ children }: LayoutProps) {
 
   const navItems = [
     { href: '/trending', label: '热点雷达', icon: TrendingUp },
+    { href: '/cbg', label: '藏宝阁', icon: Gem },
     { href: '/keywords', label: '关键词', icon: Plus },
   ]
 

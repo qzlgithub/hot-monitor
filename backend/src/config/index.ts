@@ -48,6 +48,27 @@ export const config = {
     twitter: { enabled: process.env.TWITTER_ENABLED === 'true', apiKey: process.env.TWITTER_API_KEY || '' },
   },
 
+  // 藏宝阁（梦幻西游）监控 —— 无头浏览器抓取，需登录态
+  cbg: {
+    enabled: process.env.CBG_ENABLED === 'true',
+    // 服务器范围：3y=3年以上服 / 1to3y=1到3年服 / 1y=1年内服 / ''=全部
+    serverAge: process.env.CBG_SERVER_AGE || '3y',
+    // 普通规则采集间隔（分钟）
+    interval: parseInt(process.env.CBG_INTERVAL || '30', 10),
+    // 高频（priority=fast）规则采集间隔（分钟），用于抢低价/捡漏
+    fastInterval: parseInt(process.env.CBG_FAST_INTERVAL || '15', 10),
+    // 单类搜索最多翻几页
+    maxPages: parseInt(process.env.CBG_MAX_PAGES || '2', 10),
+  },
+
+  // 无头浏览器（Playwright）
+  browser: {
+    // 持久会话目录（存登录态，扫码登录后复用）
+    userDataDir: process.env.PLAYWRIGHT_USER_DATA_DIR || path.resolve(__dirname, '../data/browser-profile'),
+    // 抓取是否无头（登录场景会强制有头）
+    headless: process.env.PLAYWRIGHT_HEADLESS === 'true',
+  },
+
   // Data Storage
   dataDir: process.env.DATA_DIR || path.resolve(__dirname, '../data'),
 

@@ -2,6 +2,7 @@ import cron from 'node-cron'
 import { dataStore, type Keyword } from '../services/dataStore.js'
 import { deepSeekService } from '../services/deepseekService.js'
 import { keywordExpansionService } from '../services/keywordExpansionService.js'
+import { cbgMonitorService } from '../services/cbgMonitorService.js'
 import config from '../config/index.js'
 import { getEnabledSources, type SourceItem } from '../services/sources/index.js'
 
@@ -17,6 +18,26 @@ class TaskScheduler {
     cron.schedule(`*/${hotspotInterval} * * * *`, () => this.collectHotspots())
 
     console.log(`✓ Hotspot collection scheduled every ${hotspotInterval} minutes`)
+
+    // 藏宝阁监控（独立调度）
+    if (config.cbg.enabled) {
+      const cbgInterval = config.cbg.interval || 30
+      cron.schedule(`*/${cbgInterval} * * * *`, () => {
+        cbgMonitorService.collect(false).catch((e) => console.error('CBG collect error:', e))
+      })
+      console.log(`✓ CBG monitor scheduled every ${cbgInterval} minutes`)
+
+      // 高频轮：只采集 priority=fast 的规则（用于捡漏/抢低价）
+      const cbgFastInterval = config.cbg.fastInterval || 15
+      if (cbgFastInterval < cbgInterval) {
+        cron.schedule(`*/${cbgFastInterval} * * * *`, () => {
+          cbgMonitorService.collect(true).catch((e) => console.error('CBG fast collect error:', e))
+        })
+        console.log(`✓ CBG fast(priority=fast) monitor scheduled every ${cbgFastInterval} minutes`)
+      }
+    } else {
+      console.log('○ CBG monitor disabled (CBG_ENABLED=false)')
+    }
   }
 
   // 获取任务运行状态
